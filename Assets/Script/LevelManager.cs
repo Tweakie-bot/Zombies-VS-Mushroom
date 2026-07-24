@@ -12,6 +12,9 @@ public class LevelManager : MonoBehaviour
         GameOver
     }
 
+    [SerializeField]
+    private WaveManager waveManager;
+
     [Header("Preparation")]
     [SerializeField]
     private float preparationDuration = 30f;
@@ -20,10 +23,6 @@ public class LevelManager : MonoBehaviour
 
     public LevelState CurrentState { get; private set; }
     public float PreparationTimeRemaining => preparationTimeRemaining;
-
-    public event Action<LevelState> OnStateChanged;
-    public event Action<float> OnPreparationTimeChanged;
-    public event Action OnWaveRequested;
 
     private void Awake()
     {
@@ -36,6 +35,7 @@ public class LevelManager : MonoBehaviour
         {
             UpdatePreparationTimer();
         }
+        Debug.Log(CurrentState);
     }
 
     public void StartLevel()
@@ -53,7 +53,6 @@ public class LevelManager : MonoBehaviour
         preparationTimeRemaining = preparationDuration;
 
         ChangeState(LevelState.Preparation);
-        OnPreparationTimeChanged?.Invoke(preparationTimeRemaining);
     }
 
     private void UpdatePreparationTimer()
@@ -64,8 +63,6 @@ public class LevelManager : MonoBehaviour
         {
             preparationTimeRemaining = 0f;
         }
-
-        OnPreparationTimeChanged?.Invoke(preparationTimeRemaining);
 
         if (preparationTimeRemaining <= 0f)
         {
@@ -81,41 +78,23 @@ public class LevelManager : MonoBehaviour
         }
 
         preparationTimeRemaining = 0f;
-        OnPreparationTimeChanged?.Invoke(preparationTimeRemaining);
+    }
 
-        StartWave();
+    public void CompleteWave()
+    {
+        StartPreparation();
     }
 
     private void StartWave()
     {
         ChangeState(LevelState.Wave);
-        OnWaveRequested?.Invoke();
+        waveManager.StartWave();
     }
 
-    public void NotifyWaveCompleted()
-    {
-        if (CurrentState != LevelState.Wave)
-        {
-            return;
-        }
-
-        StartPreparation();
-    }
-
-    public void NotifyVictory()
-    {
-        ChangeState(LevelState.Victory);
-    }
-
-    public void NotifyGameOver()
-    {
-        ChangeState(LevelState.GameOver);
-    }
 
     private void ChangeState(LevelState newState)
     {
         CurrentState = newState;
-        OnStateChanged?.Invoke(CurrentState);
 
         Debug.Log($"Level state: {CurrentState}");
     }

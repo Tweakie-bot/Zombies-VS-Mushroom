@@ -5,6 +5,9 @@ public class LevelDebug : MonoBehaviour
     [SerializeField]
     private LevelManager levelManager;
 
+    [SerializeField]
+    private WaveManager waveManager;
+
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.S))
@@ -19,7 +22,7 @@ public class LevelDebug : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.E))
         {
-            levelManager.NotifyWaveCompleted();
+            waveManager.CompleteCurrentWave();
         }
     }
 }
