@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-
 public class EnemyMovement : MonoBehaviour
 {
     [SerializeField]
@@ -10,6 +9,8 @@ public class EnemyMovement : MonoBehaviour
     private float waypointReachDistance = 0.1f;
 
     private EnemyPath currentPath;
+    private EnemyDamage enemyDamage;
+    private EnemyWaveMember waveMember;
 
     private int currentWaypointIndex;
     private bool shouldMove;
@@ -23,7 +24,10 @@ public class EnemyMovement : MonoBehaviour
         }
         currentPath = path;
         currentWaypointIndex = 0;
-        
+
+        enemyDamage = GetComponent<EnemyDamage>();
+        waveMember = GetComponent<EnemyWaveMember>();
+
         shouldMove = true;
     }
 
@@ -63,7 +67,19 @@ public class EnemyMovement : MonoBehaviour
 
         if (currentWaypointIndex >= currentPath.GetWaypointCount())
         {
-            StopMoving();
+            ReachEndOfPath();
+        }
+    }
+
+    private void ReachEndOfPath()
+    {
+        StopMoving();
+
+        EnemyWaveMember waveMember = GetComponent<EnemyWaveMember>();
+
+        if (waveMember != null)
+        {
+            waveMember.ReachEndOfPath();
         }
     }
 

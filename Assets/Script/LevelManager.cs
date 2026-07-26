@@ -35,7 +35,6 @@ public class LevelManager : MonoBehaviour
         {
             UpdatePreparationTimer();
         }
-        Debug.Log(CurrentState);
     }
 
     public void StartLevel()
@@ -82,7 +81,28 @@ public class LevelManager : MonoBehaviour
 
     public void CompleteWave()
     {
+        if (CurrentState != LevelState.Wave)
+        {
+            return;
+        }
+
         StartPreparation();
+    }
+
+    public void CompleteLevel()
+    {
+        CurrentState = LevelState.Victory;
+    }
+    public void GameOver()
+    {
+        if (CurrentState == LevelState.GameOver)
+        {
+            return;
+        }
+
+        ChangeState(LevelState.GameOver);
+
+        waveManager.StopWave();
     }
 
     private void StartWave()

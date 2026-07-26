@@ -11,6 +11,9 @@ public class WaveManager : MonoBehaviour
     [SerializeField]
     private List<WaveData> waves = new();
 
+    [SerializeField]
+    private HeroHealth heroHealth;
+
     private readonly List<EnemyWaveMember> activeEnemies = new();
 
     private int currentWaveIndex;
@@ -29,6 +32,78 @@ public class WaveManager : MonoBehaviour
         waveElapsedTime += Time.deltaTime;
 
         SpawnEnemiesReadyToAppear();
+
+        CheckWaveCompletion();
+    }
+
+    private void RemoveEnemy(EnemyWaveMember enemy)
+    {
+        if (enemy == null)
+        {
+            return;
+        }
+
+        activeEnemies.Remove(enemy);
+
+        Destroy(enemy.gameObject);
+
+        CheckWaveCompletion();
+    }
+
+    public void EnemyReachedHero(EnemyWaveMember enemy)
+    {
+        if (enemy == null)
+        {
+            return;
+        }
+
+        EnemyDamage enemyDamage =
+            enemy.GetComponent<EnemyDamage>();
+
+        if (heroHealth != null && enemyDamage != null)
+        {
+            heroHealth.TakeDamage(enemyDamage.Damage);
+        }
+
+        RemoveEnemy(enemy);
+    }
+
+    public void EnemyDied(EnemyWaveMember enemy)
+    {
+        RemoveEnemy(enemy);
+    }
+
+    private void CheckWaveCompletion()
+    {
+        if (!isWaveRunning)
+        {
+            return;
+        }
+
+        IReadOnlyList<EnemySpawnEntry> spawnEntries =
+            waves[currentWaveIndex].EnemySpawns;
+
+        bool allEnemiesSpawned =
+            nextSpawnIndex >= spawnEntries.Count;
+
+        bool noEnemiesRemaining =
+            activeEnemies.Count == 0;
+
+        if (allEnemiesSpawned && noEnemiesRemaining)
+        {
+            CompleteCurrentWave();
+        }
+    }
+    public void StopWave()
+    {
+        if (!isWaveRunning)
+        {
+            return;
+        }
+
+        isWaveRunning = false;
+
+        DestroyRemainingEnemies();
     }
 
     private void SpawnEnemiesReadyToAppear()
@@ -102,6 +177,8 @@ public class WaveManager : MonoBehaviour
         isWaveRunning = true;
 
         activeEnemies.Clear();
+
+        Debug.Log($"Wave {currentWaveIndex + 1} started.");
     }
 
     public void CompleteCurrentWave()
@@ -119,14 +196,24 @@ public class WaveManager : MonoBehaviour
 
         Debug.Log("Wave completed.");
 
-        levelManager.CompleteWave();
+        if (currentWaveIndex >= waves.Count)
+        {
+            levelManager.CompleteLevel();
+        }
+        else
+        {
+            levelManager.CompleteWave();
+        }
     }
 
     private void DestroyRemainingEnemies()
     {
         foreach (EnemyWaveMember enemy in activeEnemies)
         {
-            Destroy(enemy.gameObject);
+            if (enemy != null)
+            {
+                Destroy(enemy.gameObject);
+            }
         }
 
         activeEnemies.Clear();
