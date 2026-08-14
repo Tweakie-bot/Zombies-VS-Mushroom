@@ -57,12 +57,11 @@ public class WaveManager : MonoBehaviour
             return;
         }
 
-        EnemyDamage enemyDamage =
-            enemy.GetComponent<EnemyDamage>();
+        EnemyDamage enemyDamage = enemy.GetComponent<EnemyDamage>();
 
         if (heroHealth != null && enemyDamage != null)
         {
-            heroHealth.TakeDamage(enemyDamage.Damage);
+            heroHealth.TakeDamage(enemyDamage.GetDamage());
         }
 
         RemoveEnemy(enemy);

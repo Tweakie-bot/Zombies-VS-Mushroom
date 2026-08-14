@@ -5,5 +5,16 @@ public class EnemyDamage : MonoBehaviour
     [SerializeField]
     private int damage = 10;
 
-    public int Damage => damage;
+    void Start()
+    {
+
+    }
+    void Update()
+    {
+
+    }
+    public int GetDamage()
+    {
+        return damage;
+    }
 }
