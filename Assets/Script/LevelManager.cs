@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class LevelManager : MonoBehaviour
@@ -12,22 +11,34 @@ public class LevelManager : MonoBehaviour
         GameOver
     }
 
+    [Header("References")]
+
     [SerializeField]
     private WaveManager waveManager;
 
+    [SerializeField]
+    private TowerPlacementManager towerPlacementManager;
+
+
     [Header("Preparation")]
+
     [SerializeField]
     private float preparationDuration = 30f;
 
     private float preparationTimeRemaining;
 
+
     public LevelState CurrentState { get; private set; }
-    public float PreparationTimeRemaining => preparationTimeRemaining;
+
+    public float PreparationTimeRemaining =>
+        preparationTimeRemaining;
+
 
     private void Awake()
     {
         ChangeState(LevelState.WaitingToStart);
     }
+
 
     private void Update()
     {
@@ -36,6 +47,7 @@ public class LevelManager : MonoBehaviour
             UpdatePreparationTimer();
         }
     }
+
 
     public void StartLevel()
     {
@@ -47,12 +59,14 @@ public class LevelManager : MonoBehaviour
         StartPreparation();
     }
 
+
     private void StartPreparation()
     {
         preparationTimeRemaining = preparationDuration;
 
         ChangeState(LevelState.Preparation);
     }
+
 
     private void UpdatePreparationTimer()
     {
@@ -69,6 +83,7 @@ public class LevelManager : MonoBehaviour
         }
     }
 
+
     public void SkipPreparation()
     {
         if (CurrentState != LevelState.Preparation)
@@ -78,6 +93,7 @@ public class LevelManager : MonoBehaviour
 
         preparationTimeRemaining = 0f;
     }
+
 
     public void CompleteWave()
     {
@@ -89,10 +105,13 @@ public class LevelManager : MonoBehaviour
         StartPreparation();
     }
 
+
     public void CompleteLevel()
     {
-        CurrentState = LevelState.Victory;
+        ChangeState(LevelState.Victory);
     }
+
+
     public void GameOver()
     {
         if (CurrentState == LevelState.GameOver)
@@ -102,13 +121,35 @@ public class LevelManager : MonoBehaviour
 
         ChangeState(LevelState.GameOver);
 
-        waveManager.StopWave();
+        if (waveManager != null)
+        {
+            waveManager.StopWave();
+        }
+        else
+        {
+            Debug.LogError(
+                "[LevelManager] WaveManager non assigné.",
+                this
+            );
+        }
     }
+
 
     private void StartWave()
     {
         ChangeState(LevelState.Wave);
-        waveManager.StartWave();
+
+        if (waveManager != null)
+        {
+            waveManager.StartWave();
+        }
+        else
+        {
+            Debug.LogError(
+                "[LevelManager] WaveManager non assigné.",
+                this
+            );
+        }
     }
 
 
@@ -116,6 +157,28 @@ public class LevelManager : MonoBehaviour
     {
         CurrentState = newState;
 
-        Debug.Log($"Level state: {CurrentState}");
+        Debug.Log($"[LevelManager] Level state: {CurrentState}");
+
+        if (towerPlacementManager == null)
+        {
+            Debug.LogError(
+                "[LevelManager] TowerPlacementManager non assigné.",
+                this
+            );
+
+            return;
+        }
+
+        bool placementAllowed =
+            CurrentState == LevelState.Preparation;
+
+        Debug.Log(
+            $"[LevelManager] Placement autorisé : {placementAllowed}",
+            this
+        );
+
+        towerPlacementManager.SetPlacementAllowed(
+            placementAllowed
+        );
     }
 }
